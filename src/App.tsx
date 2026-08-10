@@ -73,9 +73,19 @@ const sortedRepos = [...repos].sort((a, b) => {
       `https://api.github.com/users/${searchName}`
     );
 
-    if (!userResponse.ok) {
-      throw new Error("GitHub user not found.");
-    }
+   if (!userResponse.ok) {
+  if (userResponse.status === 403) {
+    throw new Error(
+      "GitHub API rate limit reached. Please try again later."
+    );
+  }
+
+  if (userResponse.status === 404) {
+    throw new Error("GitHub user not found.");
+  }
+
+  throw new Error(`GitHub API error (${userResponse.status}).`);
+}
 
     const userData: GitHubUser = await userResponse.json();
 
